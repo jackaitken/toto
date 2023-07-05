@@ -208,5 +208,14 @@ func Delete(id string) error {
 
 	delete(allLists[dateToday].Items, id)
 
+	// Marshal and save the file
+	lists, err := json.Marshal(allLists)
+	if err != nil {
+		fmt.Println("error marshaling file")
+		return err
+	}
+
+	_ = os.WriteFile("./todos_test.json", lists, 0644)
+
 	return nil
 }
