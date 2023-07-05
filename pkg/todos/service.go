@@ -20,10 +20,6 @@ func Get(date string) (Todos, error) {
 
 	list := allLists[date]
 
-	/*
-
-	 */
-
 	return list, nil
 }
 
