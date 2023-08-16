@@ -1,4 +1,4 @@
-# Toto
+# Toto 🚽
 
 Toto is a lightweight command-line application that allows you to create and manage todo lists right in your terminal.
 
