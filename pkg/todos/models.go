@@ -1,7 +1,7 @@
 package todos
 
 type Todos struct {
-	Items Item
+	Items Item `json:"items"`
 }
 
 type AllLists map[string]Todos

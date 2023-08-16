@@ -1,54 +1,23 @@
 package todos
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
-const TimeFormat = "2006-01-02"
-const CompletedString = " --DONE!"
+func Get() (Todos, error) {
+	dateToday := time.Now().UTC().Format(TimeFormat)
 
-func Get(date string) (Todos, error) {
 	allLists, err := GetAllLists()
 	if err != nil {
 		return Todos{}, err
 	}
 
-	list := allLists[date]
+	list := allLists[dateToday]
 
 	return list, nil
-}
-
-func CreateList() error {
-	// Get all current lists
-	allLists, err := GetAllLists()
-	if err != nil {
-		fmt.Println("error getting all lists")
-		return err
-	}
-
-	// Create a new list and add an empty map for the todo items
-	newList := Todos{}
-	newList.Items = make(Item)
-
-	// Add new list with today's date as the key
-	dateToday := time.Now().UTC().Format(TimeFormat)
-	allLists[dateToday] = newList
-
-	// Marshal and save the file
-	lists, err := json.Marshal(allLists)
-	if err != nil {
-		fmt.Println("error marshaling file")
-		return err
-	}
-
-	_ = os.WriteFile("./todos_test.json", lists, 0644)
-
-	return nil
 }
 
 func CreateTodo(todo string) error {
@@ -77,18 +46,13 @@ func CreateTodo(todo string) error {
 		}
 	}
 
-	// Key for new item will be length of list + 1
+	// Key for new item will be (length of list) + 1
 	listSize := len(allLists[dateToday].Items)
 	allLists[dateToday].Items[strconv.Itoa(listSize+1)] = todo
 
-	// Marshal and save the file
-	lists, err := json.Marshal(allLists)
-	if err != nil {
-		fmt.Println("error marshaling file")
+	if err = Save(allLists); err != nil {
 		return err
 	}
-
-	_ = os.WriteFile("./todos_test.json", lists, 0644)
 
 	return nil
 }
@@ -110,14 +74,9 @@ func Edit(id string, newText string) error {
 
 	allLists[dateToday].Items[id] = newText
 
-	// Marshal and save the file
-	lists, err := json.Marshal(allLists)
-	if err != nil {
-		fmt.Println("error marshaling file")
+	if err = Save(allLists); err != nil {
 		return err
 	}
-
-	_ = os.WriteFile("./todos_test.json", lists, 0644)
 
 	return nil
 }
@@ -137,17 +96,18 @@ func Complete(id string) error {
 		return nil
 	}
 
-	todo = todo + CompletedString
-	allLists[dateToday].Items[id] = todo
-
-	// Marshal and save the file
-	lists, err := json.Marshal(allLists)
-	if err != nil {
-		fmt.Println("error marshaling file")
-		return err
+	// Check if todo is already marked as complete
+	if strings.Contains(todo, CompletedString) {
+		fmt.Println("todo is already marked as complete")
+		return nil
 	}
 
-	_ = os.WriteFile("./todos_test.json", lists, 0644)
+	todo = Green + todo + CompletedString + ColorReset
+	allLists[dateToday].Items[id] = todo
+
+	if err = Save(allLists); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -161,28 +121,25 @@ func Incomplete(id string) error {
 		return err
 	}
 
-	todo := allLists[dateToday].Items[id]
+	todo := ColorReset + allLists[dateToday].Items[id] + ColorReset
 	if todo == "" {
 		fmt.Printf("no todo with id: %v", id)
 		return nil
 	}
 
-	index := strings.Index(todo, "--DONE!")
-	if index == -1 {
+	completeStringIndex := strings.Index(todo, CompletedString)
+	if completeStringIndex == -1 {
 		fmt.Println("todo is already marked as incomplete")
 		return nil
 	} else {
-		allLists[dateToday].Items[id] = todo[:index]
+		// Make sure we also remove the coloring
+		coloringIndex := strings.Index(todo, Green)
+		allLists[dateToday].Items[id] = todo[(coloringIndex + len(Green)):completeStringIndex]
 	}
 
-	// Marshal and save the file
-	lists, err := json.Marshal(allLists)
-	if err != nil {
-		fmt.Println("error marshaling file")
+	if err = Save(allLists); err != nil {
 		return err
 	}
-
-	_ = os.WriteFile("./todos_test.json", lists, 0644)
 
 	return nil
 }
@@ -204,14 +161,11 @@ func Delete(id string) error {
 
 	delete(allLists[dateToday].Items, id)
 
-	// Marshal and save the file
-	lists, err := json.Marshal(allLists)
-	if err != nil {
-		fmt.Println("error marshaling file")
+	lists := ReorderList(allLists)
+
+	if err = Save(lists); err != nil {
 		return err
 	}
-
-	_ = os.WriteFile("./todos_test.json", lists, 0644)
 
 	return nil
 }

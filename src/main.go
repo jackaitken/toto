@@ -1,42 +1,32 @@
 package main
 
 import (
-	"cli-todos/pkg/todos"
-	"fmt"
+	"cli-todos/cmd"
 	"log"
+	"os"
 )
 
 func main() {
-	//err := todos.CreateList()
-	//if err != nil {
-	//	log.Fatalf("error while creating new list: %v", err)
-	//}
+	// Check if the todos.json file already exists. If not
+	// create a new one
 
-	//err := todos.CreateList()
-	//if err != nil {
-	//	log.Fatalf("error while creating new list: %v", err)
-	//}
-
-	err := todos.CreateTodo("finish work")
+	files, err := os.ReadDir(".")
 	if err != nil {
-		log.Fatalf("error while creating new todo: %v", err)
+		log.Fatal(err)
 	}
 
-	err = todos.Complete("1")
-	if err != nil {
-		log.Fatalf("error while marking todo as complete: %v", err)
+	todoFileExists := false
+
+	for _, file := range files {
+		if file.Name() == "todos.json" {
+			todoFileExists = true
+			break
+		}
 	}
 
-	list, err := todos.Get("2023-07-05")
-	if err != nil {
-		log.Fatalf("error while getting todo list: %v", err)
+	if !todoFileExists {
+		_, _ = os.Create("todos.json")
 	}
 
-	err = todos.Incomplete("1")
-	if err != nil {
-		log.Fatalf("error while marking todo as incomplete")
-	}
-
-	fmt.Println(list)
-
+	cmd.Execute()
 }
