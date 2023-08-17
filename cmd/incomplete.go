@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"cli-todos/pkg/todos"
 	"log"
+
+	"github.com/jackaitken/toto/pkg/todos"
 
 	"github.com/spf13/cobra"
 )
