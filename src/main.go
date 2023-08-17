@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cli-todos/cmd"
-	"cli-todos/pkg"
+	"github.com/jackaitken/toto/cmd"
+	"github.com/jackaitken/toto/pkg"
 )
 
 func main() {

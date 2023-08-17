@@ -1,4 +1,4 @@
-module toto
+module github.com/jackaitken/toto
 
 go 1.19
 
