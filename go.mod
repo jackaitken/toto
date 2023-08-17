@@ -1,4 +1,4 @@
-module cli-todos
+module toto
 
 go 1.19
 

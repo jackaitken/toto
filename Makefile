@@ -1,2 +1,2 @@
 build:
-	go build -o ~/go/bin/copycat ./src
+	go build -o ~/go/bin/toto ./src
